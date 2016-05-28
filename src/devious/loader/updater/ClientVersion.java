@@ -3,17 +3,18 @@ package devious.loader.updater;
 public class ClientVersion {
 
     public final String name;
-    public final String version;
-    public final String jarPath;
+    public final double version;
+    public final String jarName;
 
     public final String fileName;
 
-    public ClientVersion(final String name, final String version, final String jarPath) {
+    public ClientVersion(final String name, final double version, final String jarName) {
         this.name = name;
         this.version = version;
-        this.jarPath = jarPath;
+        this.jarName = jarName;
 
-        fileName = String.format("%s-%s.jar", name, version);
+        fileName = String.format("%s-%s.jar", jarName, Double.toString(version).replace(".", "_"));
+        System.out.println(fileName);
     }
 
 }

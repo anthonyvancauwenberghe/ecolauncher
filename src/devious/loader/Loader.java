@@ -15,13 +15,12 @@ import java.awt.GridLayout;
 public class Loader extends JFrame {
 
     public Loader() {
-        super("Devious Loader");
+        super("DeviousPs Loader");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         final JPanel center = new JPanel(new GridLayout(1, 2, 5, 5));
-        center.add(new VersionsPanel(this, true));
-        center.add(new VersionsPanel(this, false));
+        center.add(new VersionsPanel(this));
 
         add(new JLabel(Res.BANNER, JLabel.CENTER), BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);

@@ -4,36 +4,20 @@ import devious.loader.res.Res;
 import devious.loader.updater.ClientUpdater;
 import devious.loader.updater.ClientVersion;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class VersionsPanel extends JPanel implements ActionListener {
-
-    private final boolean remote;
 
     private final JButton refreshButton;
 
     private final JComboBox nameBox;
     private final DefaultComboBoxModel nameModel;
-
-    private final JComboBox versionBox;
-    private final DefaultComboBoxModel versionModel;
 
     private final JButton playButton;
 
@@ -41,78 +25,41 @@ public class VersionsPanel extends JPanel implements ActionListener {
 
     private final Loader loader;
 
-    public VersionsPanel(final Loader loader, final boolean remote) {
+    public VersionsPanel(final Loader loader) {
         super(new BorderLayout(5, 0));
-        setBorder(new TitledBorder((remote ? "Remote" : "Local") + " Client Versions"));
+        setBorder(new TitledBorder("Launch Client"));
         this.loader = loader;
-        this.remote = remote;
 
         refreshButton = new JButton(Res.REFRESH_16);
+        refreshButton.setPreferredSize(new Dimension(50, 50));
         refreshButton.addActionListener(this);
 
         nameModel = new DefaultComboBoxModel();
-        nameModel.addElement("--- No Names ---");
+        nameModel.addElement("--- No Clients Available ---");
 
         nameBox = new JComboBox(nameModel);
         nameBox.setEnabled(false);
-        nameBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(final ItemEvent e) {
-                final String name = (String) nameBox.getSelectedItem();
-                final List<String> matches = new ArrayList<String>();
-                if(list != null && name != null){
-                    for(final ClientVersion cv : list)
-                        if(cv.name.equals(name))
-                            matches.add(cv.version);
-                }
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        versionModel.removeAllElements();
-                        if(matches.isEmpty()){
-                            versionModel.addElement("--- No Versions ---");
-                            versionBox.setEnabled(false);
-                        }else{
-                            for(final String m : matches)
-                                versionModel.addElement(m);
-                            versionBox.setEnabled(true);
-                        }
-                        versionBox.repaint();
-                    }
-                });
-            }
-        });
 
         final JLabel nameLabel = new JLabel("Name:", JLabel.RIGHT);
-        nameLabel.setPreferredSize(new Dimension(70, nameLabel.getPreferredSize().height));
+        nameLabel.setPreferredSize(new Dimension(40, 10));
 
         final JPanel namePanel = new JPanel(new BorderLayout(5, 0));
         namePanel.add(nameLabel, BorderLayout.WEST);
         namePanel.add(nameBox, BorderLayout.CENTER);
 
-        versionModel = new DefaultComboBoxModel();
-        versionModel.addElement("--- No Versions ---");
-
-        versionBox = new JComboBox(versionModel);
-        versionBox.setEnabled(false);
-
-        final JLabel versionLabel = new JLabel("Version:", JLabel.RIGHT);
-        versionLabel.setPreferredSize(new Dimension(70, versionLabel.getPreferredSize().height));
-
         final JPanel versionPanel = new JPanel(new BorderLayout(5, 0));
-        versionPanel.add(versionLabel, BorderLayout.WEST);
-        versionPanel.add(versionBox, BorderLayout.CENTER);
 
         final JPanel boxPanel = new JPanel(new GridLayout(2, 1, 5, 5));
         boxPanel.add(namePanel);
         boxPanel.add(versionPanel);
 
         playButton = new JButton(Res.PLAY_16);
+        playButton.setPreferredSize(new Dimension(playButton.getPreferredSize().width, 50));
         playButton.addActionListener(this);
 
         add(refreshButton, BorderLayout.WEST);
         add(boxPanel, BorderLayout.CENTER);
-        add(playButton, BorderLayout.EAST);
+        add(playButton, BorderLayout.SOUTH);
 
         refreshButton.doClick();
     }
@@ -130,14 +77,10 @@ public class VersionsPanel extends JPanel implements ActionListener {
                     nameModel.addElement("--- No Names ---");
                     nameBox.setEnabled(false);
                     nameBox.repaint();
-                    versionModel.removeAllElements();
-                    versionModel.addElement("--- No Versions ---");
-                    versionBox.setEnabled(false);
-                    versionBox.repaint();
                 }
             });
             try{
-                list = remote ? ClientUpdater.loadRemoteVersions() : ClientUpdater.loadLocalVersions();
+                list = ClientUpdater.loadRemoteVersions();
                 for(int i = 0; i < list.size(); i++){
                     final int fi = i;
                     final ClientVersion v = list.get(i);
@@ -172,8 +115,7 @@ public class VersionsPanel extends JPanel implements ActionListener {
             });
         }else if(source.equals(playButton)){
             final String name = (String) nameBox.getSelectedItem();
-            final String version = (String) versionBox.getSelectedItem();
-            if(list == null || name == null || version == null || !nameBox.isEnabled() || !versionBox.isEnabled()){
+            if(list == null || name == null || !nameBox.isEnabled()){
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -184,7 +126,7 @@ public class VersionsPanel extends JPanel implements ActionListener {
             }
             ClientVersion cv = null;
             for(final ClientVersion c : list){
-                if(c.name.equals(name) && c.version.equals(version)){
+                if(c.name.equals(name)){
                     cv = c;
                     break;
                 }
